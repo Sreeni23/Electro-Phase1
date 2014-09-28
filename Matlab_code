@@ -1,0 +1,87 @@
+%Intitialize Time
+d=0.01;
+mx = 100/d + 1;
+t=0:d:100;
+
+%Constants
+M = 10^(-3);
+g_K = 36*M; g_Na = 120*M; g_L = 0.3*M; 
+E_K = -12*M; E_Na = 115*M; E_L = 10.6*M;
+Vrest = -70*M;
+Cm    = 1.0*M*M;
+
+%Variables 
+Vm = zeros(1,mx);
+Am = zeros(1,mx); Bm = zeros(1,mx);
+An = zeros(1,mx); Bn = zeros(1,mx);
+Ah = zeros(1,mx); Bh = zeros(1,mx);
+V = zeros(1,mx);
+m = zeros(1,mx); n = zeros(1,mx); h = zeros(1,mx);
+I = zeros(1,mx);
+I_ion = zeros(1,mx);
+%Initial Conditions
+I_ion(1) = 0 ;
+Vm(1) = Vrest;
+V(1) = (Vrest)/M;
+Am(1) = 0.1*((25-V(1))/(exp((25-V(1))/10)-1));
+Bm(1) = 4*exp(-V(1)/18);
+An(1) = 0.01*((10-V(1))/(exp((10-V(1))/10)-1));
+Bn(1) = 0.125*exp(-V(1)/80);
+Ah(1) = 0.07*exp(-V(1)/20);
+Bh(1) = 1/(exp((30-V(1))/10)+1);
+
+%V(1) = (Vm(1)-Vrest)/M;
+%V(1) = (Vrest)/M;
+%Am(1) = 0.1*((25+V(1))/(exp((25+V(1))/10)-1));
+%Bm(1) = 4*exp(V(1)/18);
+%An(1) = 0.01*((10+V(1))/(exp((10+V(1))/10)-1));
+%Bn(1) = 0.125*exp(V(1)/80);
+%Ah(1) = 0.07*exp(V(1)/20);
+%Bh(1) = 1/(exp((30+V(1))/10)+1);
+
+m(1) = Am(1)/(Am(1)+Bm(1));
+n(1) = An(1)/(An(1)+Bn(1));
+h(1) = Ah(1)/(Ah(1)+Bh(1));
+
+I(1:500) = 5*M*M; 
+%I(501:mx)= 5*M*M;
+%Calculations
+    for i=2:mx-1
+        %V(i) = (Vm(i-1)-Vrest)/M;
+        %Am(i) = 0.1*((25+V(i))/(exp((25+V(i))/10)-1));
+        %Bm(i) = 4*(exp(V(i)/18));
+        %An(i) = 0.01*((10+V(i))/(exp((10+V(i))/10)-1));
+        %Bn(i) = 0.125*exp(V(i)/(80));
+        %Ah(i) = 0.07*exp(V(i)/(20));
+        %Bh(i) = 1/(exp((30+V(i))/10)+1);
+        
+        V(i) = (Vm(i-1))/M;
+        Am(i) = 0.1*((25-V(i))/(exp((25-V(i))/10)-1));
+        Bm(i) = 4*(exp(-V(i)/18));
+        An(i) = 0.01*((10-V(i))/(exp((10-V(i))/10)-1));
+        Bn(i) = 0.125*exp(-V(i)/(80));
+        Ah(i) = 0.07*exp(-V(i)/(20));
+        Bh(i) = 1/(exp((30-V(i))/10)+1);
+        
+        m(i) = m(i-1)+d*(Am(i)*(1-m(i-1))-Bm(i)*m(i-1));
+        n(i) = n(i-1)+d*(An(i)*(1-n(i-1))-Bn(i)*n(i-1));
+        h(i) = h(i-1)+d*(Ah(i)*(1-h(i-1))-Bh(i)*h(i-1));
+        
+        I_Na = (m(i)^3)*g_Na*h(i)*(Vm(i-1)-E_Na);
+        I_K = (n(i)^4)*g_K*(Vm(i-1)-E_K);
+        I_L = g_L*(Vm(i-1)-E_L);
+        
+        %I_Na = (m(i)^3)*g_Na*h(i)*(V(i)-E_Na);
+        %I_K = (n(i)^4)*g_K*(V(i)-E_K);
+        %I_L = g_L*(V(i)-E_L);
+        
+        I_ion(i) = I(i)-I_K-I_Na-I_L;        
+        Vm(i) = Vm(i-1) + M*d*(I_ion(i)/Cm);
+   end
+ t1=t(1:30);
+ V1=Vm(1:30);
+ plot(t,Vm/M);
+ %plot(t,I_ion);
+ 
+   
+   
